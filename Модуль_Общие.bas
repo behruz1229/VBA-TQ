@@ -1,53 +1,53 @@
-Attribute VB_Name = "Модуль_Общие"
+Attribute VB_Name = "РњРѕРґСѓР»СЊ_РћР±С‰РёРµ"
 ' ============================================================================
-' МОДУЛЬ: Модуль_Общие
-' НАЗНАЧЕНИЕ: Библиотека вспомогательных функций, используемых во всех модулях.
-' ФУНКЦИИ:
-'   - ОбновитьСтатус: Отображение прогресс-бара в строке статуса Excel.
-'   - НайтиСамыйСвежийФайл: Поиск файла по маске и автоматический выбор версии с последней датой изменения.
-'   - БезопасныйКлюч: Генерация уникального текстового ключа из массива значений (защита от null, пробелов и спецсимволов).
-'   - LogMsg: Вывод отладочной информации, этапов работы и статистики в окно Immediate (Ctrl+G).
+' РњРћР”РЈР›Р¬: РњРѕРґСѓР»СЊ_РћР±С‰РёРµ
+' РќРђР—РќРђР§Р•РќРР•: Р‘РёР±Р»РёРѕС‚РµРєР° РІСЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹С… С„СѓРЅРєС†РёР№, РёСЃРїРѕР»СЊР·СѓРµРјС‹С… РІРѕ РІСЃРµС… РјРѕРґСѓР»СЏС….
+' Р¤РЈРќРљР¦РР:
+'   - РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ: РћС‚РѕР±СЂР°Р¶РµРЅРёРµ РїСЂРѕРіСЂРµСЃСЃ-Р±Р°СЂР° РІ СЃС‚СЂРѕРєРµ СЃС‚Р°С‚СѓСЃР° Excel.
+'   - РќР°Р№С‚РёРЎР°РјС‹Р№РЎРІРµР¶РёР№Р¤Р°Р№Р»: РџРѕРёСЃРє С„Р°Р№Р»Р° РїРѕ РјР°СЃРєРµ Рё Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРёР№ РІС‹Р±РѕСЂ РІРµСЂСЃРёРё СЃ РїРѕСЃР»РµРґРЅРµР№ РґР°С‚РѕР№ РёР·РјРµРЅРµРЅРёСЏ.
+'   - Р‘РµР·РѕРїР°СЃРЅС‹Р№РљР»СЋС‡: Р“РµРЅРµСЂР°С†РёСЏ СѓРЅРёРєР°Р»СЊРЅРѕРіРѕ С‚РµРєСЃС‚РѕРІРѕРіРѕ РєР»СЋС‡Р° РёР· РјР°СЃСЃРёРІР° Р·РЅР°С‡РµРЅРёР№ (Р·Р°С‰РёС‚Р° РѕС‚ null, РїСЂРѕР±РµР»РѕРІ Рё СЃРїРµС†СЃРёРјРІРѕР»РѕРІ).
+'   - LogMsg: Р’С‹РІРѕРґ РѕС‚Р»Р°РґРѕС‡РЅРѕР№ РёРЅС„РѕСЂРјР°С†РёРё, СЌС‚Р°РїРѕРІ СЂР°Р±РѕС‚С‹ Рё СЃС‚Р°С‚РёСЃС‚РёРєРё РІ РѕРєРЅРѕ Immediate (Ctrl+G).
 ' ============================================================================
 
 Option Explicit
 
-' Прогресс-бар в строке статуса
-Public Sub ОбновитьСтатус(прогресс As Integer, текст As String)
-    Dim pct As Integer: pct = Application.Min(прогресс, 100)
+' РџСЂРѕРіСЂРµСЃСЃ-Р±Р°СЂ РІ СЃС‚СЂРѕРєРµ СЃС‚Р°С‚СѓСЃР°
+Public Sub РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ(РїСЂРѕРіСЂРµСЃСЃ As Integer, С‚РµРєСЃС‚ As String)
+    Dim pct As Integer: pct = Application.Min(РїСЂРѕРіСЂРµСЃСЃ, 100)
     Dim filled As Integer: filled = pct \ 5
-    Application.StatusBar = текст & " " & String(filled, "#") & String(20 - filled, "-") & " " & pct & "%"
+    Application.StatusBar = С‚РµРєСЃС‚ & " " & String(filled, "#") & String(20 - filled, "-") & " " & pct & "%"
     DoEvents
 End Sub
 
-' ?? Поиск самого свежего файла по маске
-Public Function НайтиСамыйСвежийФайл(путь As String, маска As String) As String
+' ?? РџРѕРёСЃРє СЃР°РјРѕРіРѕ СЃРІРµР¶РµРіРѕ С„Р°Р№Р»Р° РїРѕ РјР°СЃРєРµ
+Public Function РќР°Р№С‚РёРЎР°РјС‹Р№РЎРІРµР¶РёР№Р¤Р°Р№Р»(РїСѓС‚СЊ As String, РјР°СЃРєР° As String) As String
     Dim f As String, latestFile As String, latestDate As Date
-    f = Dir(путь & маска)
+    f = Dir(РїСѓС‚СЊ & РјР°СЃРєР°)
     If f = "" Then Exit Function
     Do While f <> ""
         Dim currDate As Date
         On Error Resume Next
-        currDate = FileDateTime(путь & f)
+        currDate = FileDateTime(РїСѓС‚СЊ & f)
         On Error GoTo 0
         If currDate > latestDate Then
             latestDate = currDate
-            latestFile = путь & f
+            latestFile = РїСѓС‚СЊ & f
         End If
         f = Dir()
     Loop
-    НайтиСамыйСвежийФайл = latestFile
+    РќР°Р№С‚РёРЎР°РјС‹Р№РЎРІРµР¶РёР№Р¤Р°Р№Р» = latestFile
 End Function
 
-' Генерация безопасного ключа
-Public Function БезопасныйКлюч(ParamArray args() As Variant) As String
+' Р“РµРЅРµСЂР°С†РёСЏ Р±РµР·РѕРїР°СЃРЅРѕРіРѕ РєР»СЋС‡Р°
+Public Function Р‘РµР·РѕРїР°СЃРЅС‹Р№РљР»СЋС‡(ParamArray args() As Variant) As String
     Dim i As Integer, res As String
     For i = 0 To UBound(args)
         res = res & Trim(Replace(CStr(args(i)), "_", "-")) & "_"
     Next i
-    БезопасныйКлюч = Left(res, Len(res) - 1)
+    Р‘РµР·РѕРїР°СЃРЅС‹Р№РљР»СЋС‡ = Left(res, Len(res) - 1)
 End Function
 
-' ?? Логирование в окно Immediate (Ctrl+G)
+' ?? Р›РѕРіРёСЂРѕРІР°РЅРёРµ РІ РѕРєРЅРѕ Immediate (Ctrl+G)
 Public Sub LogMsg(msg As String, Optional level As String = "INFO")
     Debug.Print "[" & level & "] " & Format(Now, "hh:mm:ss") & " | " & msg
 End Sub

@@ -1,67 +1,67 @@
-Attribute VB_Name = "Модуль1_Источники1_2"
+Attribute VB_Name = "РњРѕРґСѓР»СЊ1_РСЃС‚РѕС‡РЅРёРєРё1_2"
 ' ============================================================================
-' МОДУЛЬ: Модуль1_Источники1_2
-' НАЗНАЧЕНИЕ: Синхронизация данных из мастер-файлов МОТ и ТСБ.
-' ЛОГИКА РАБОТЫ:
-'   1. Поиск и безопасное открытие последних версий файлов "*МОТ - Монтаж МК..." и "*ТСБ - Монтаж МК...".
-'   2. Сканирование приёмника: сохранение существующих позиций (ключ B_C_D_F + индекс I) и значений столбца G.
-'   3. Чтение источников: генерация уникальных индексов позиций, сравнение с приёмником.
-'   4. Вставка: Недостающие или изменённые (по столбцу G) строки добавляются в конец таблицы (зелёная заливка RGB 102,255,102).
-'   5. Проверка: Строки приёмника, отсутствующие в источниках или с изменённым G, помечаются оранжевым (RGB 255,153,51).
-'   6. Файлы, открытые пользователем вручную, макрос не закрывает. Закрываются только те, что открыл скрипт.
+' РњРћР”РЈР›Р¬: РњРѕРґСѓР»СЊ1_РСЃС‚РѕС‡РЅРёРєРё1_2
+' РќРђР—РќРђР§Р•РќРР•: РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ РґР°РЅРЅС‹С… РёР· РјР°СЃС‚РµСЂ-С„Р°Р№Р»РѕРІ РњРћРў Рё РўРЎР‘.
+' Р›РћР“РРљРђ Р РђР‘РћРўР«:
+'   1. РџРѕРёСЃРє Рё Р±РµР·РѕРїР°СЃРЅРѕРµ РѕС‚РєСЂС‹С‚РёРµ РїРѕСЃР»РµРґРЅРёС… РІРµСЂСЃРёР№ С„Р°Р№Р»РѕРІ "*РњРћРў - РњРѕРЅС‚Р°Р¶ РњРљ..." Рё "*РўРЎР‘ - РњРѕРЅС‚Р°Р¶ РњРљ...".
+'   2. РЎРєР°РЅРёСЂРѕРІР°РЅРёРµ РїСЂРёС‘РјРЅРёРєР°: СЃРѕС…СЂР°РЅРµРЅРёРµ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… РїРѕР·РёС†РёР№ (РєР»СЋС‡ B_C_D_F + РёРЅРґРµРєСЃ I) Рё Р·РЅР°С‡РµРЅРёР№ СЃС‚РѕР»Р±С†Р° G.
+'   3. Р§С‚РµРЅРёРµ РёСЃС‚РѕС‡РЅРёРєРѕРІ: РіРµРЅРµСЂР°С†РёСЏ СѓРЅРёРєР°Р»СЊРЅС‹С… РёРЅРґРµРєСЃРѕРІ РїРѕР·РёС†РёР№, СЃСЂР°РІРЅРµРЅРёРµ СЃ РїСЂРёС‘РјРЅРёРєРѕРј.
+'   4. Р’СЃС‚Р°РІРєР°: РќРµРґРѕСЃС‚Р°СЋС‰РёРµ РёР»Рё РёР·РјРµРЅС‘РЅРЅС‹Рµ (РїРѕ СЃС‚РѕР»Р±С†Сѓ G) СЃС‚СЂРѕРєРё РґРѕР±Р°РІР»СЏСЋС‚СЃСЏ РІ РєРѕРЅРµС† С‚Р°Р±Р»РёС†С‹ (Р·РµР»С‘РЅР°СЏ Р·Р°Р»РёРІРєР° RGB 102,255,102).
+'   5. РџСЂРѕРІРµСЂРєР°: РЎС‚СЂРѕРєРё РїСЂРёС‘РјРЅРёРєР°, РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‰РёРµ РІ РёСЃС‚РѕС‡РЅРёРєР°С… РёР»Рё СЃ РёР·РјРµРЅС‘РЅРЅС‹Рј G, РїРѕРјРµС‡Р°СЋС‚СЃСЏ РѕСЂР°РЅР¶РµРІС‹Рј (RGB 255,153,51).
+'   6. Р¤Р°Р№Р»С‹, РѕС‚РєСЂС‹С‚С‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј РІСЂСѓС‡РЅСѓСЋ, РјР°РєСЂРѕСЃ РЅРµ Р·Р°РєСЂС‹РІР°РµС‚. Р—Р°РєСЂС‹РІР°СЋС‚СЃСЏ С‚РѕР»СЊРєРѕ С‚Рµ, С‡С‚Рѕ РѕС‚РєСЂС‹Р» СЃРєСЂРёРїС‚.
 ' ============================================================================
 
 Option Explicit
 
-Public Sub Модуль1_Обновление_Источники1_2()
-    Const PATH_SRC As String = "\\vls.lan\ULVZG-DFS\ПТС\1.14. ТСБ и МОТ_Исполнительная документация КМ\!Ведомость элементов\"
-    Const SHEET_REC As String = "Ведомость элементов ТСБ и МОТ"
+Public Sub РњРѕРґСѓР»СЊ1_РћР±РЅРѕРІР»РµРЅРёРµ_РСЃС‚РѕС‡РЅРёРєРё1_2()
+    Const PATH_SRC As String = "\\vls.lan\ULVZG-DFS\РџРўРЎ\1.14. РўРЎР‘ Рё РњРћРў_РСЃРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РґРѕРєСѓРјРµРЅС‚Р°С†РёСЏ РљРњ\!Р’РµРґРѕРјРѕСЃС‚СЊ СЌР»РµРјРµРЅС‚РѕРІ\"
+    Const SHEET_REC As String = "Р’РµРґРѕРјРѕСЃС‚СЊ СЌР»РµРјРµРЅС‚РѕРІ РўРЎР‘ Рё РњРћРў"
     Const REC_START_ROW As Long = 3
     Const SRC_START_ROW As Long = 25
     
-    LogMsg "=== ЗАПУСК МОДУЛЯ 1 ==="
-    ОбновитьСтатус 5, "Поиск файлов источников..."
+    LogMsg "=== Р—РђРџРЈРЎРљ РњРћР”РЈР›РЇ 1 ==="
+    РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 5, "РџРѕРёСЃРє С„Р°Р№Р»РѕРІ РёСЃС‚РѕС‡РЅРёРєРѕРІ..."
     
     Dim fso As Object: Set fso = CreateObject("Scripting.FileSystemObject")
     
-    Dim fileМОТ As String, fileТСБ As String
-    fileМОТ = НайтиСамыйСвежийФайл(PATH_SRC, "*МОТ - Монтаж МК - Мастер файл*.xlsb")
-    fileТСБ = НайтиСамыйСвежийФайл(PATH_SRC, "*ТСБ - Монтаж МК - Мастер файл*.xlsb")
+    Dim fileРњРћРў As String, fileРўРЎР‘ As String
+    fileРњРћРў = РќР°Р№С‚РёРЎР°РјС‹Р№РЎРІРµР¶РёР№Р¤Р°Р№Р»(PATH_SRC, "*РњРћРў - РњРѕРЅС‚Р°Р¶ РњРљ - РњР°СЃС‚РµСЂ С„Р°Р№Р»*.xlsb")
+    fileРўРЎР‘ = РќР°Р№С‚РёРЎР°РјС‹Р№РЎРІРµР¶РёР№Р¤Р°Р№Р»(PATH_SRC, "*РўРЎР‘ - РњРѕРЅС‚Р°Р¶ РњРљ - РњР°СЃС‚РµСЂ С„Р°Р№Р»*.xlsb")
     
-    If fileМОТ <> "" Then LogMsg "Найден МОТ: " & fso.GetFileName(fileМОТ) Else LogMsg "МОТ не найден", "WARN"
-    If fileТСБ <> "" Then LogMsg "Найден ТСБ: " & fso.GetFileName(fileТСБ) Else LogMsg "ТСБ не найден", "WARN"
+    If fileРњРћРў <> "" Then LogMsg "РќР°Р№РґРµРЅ РњРћРў: " & fso.GetFileName(fileРњРћРў) Else LogMsg "РњРћРў РЅРµ РЅР°Р№РґРµРЅ", "WARN"
+    If fileРўРЎР‘ <> "" Then LogMsg "РќР°Р№РґРµРЅ РўРЎР‘: " & fso.GetFileName(fileРўРЎР‘) Else LogMsg "РўРЎР‘ РЅРµ РЅР°Р№РґРµРЅ", "WARN"
     
     Dim missingFile As String
-    If fileМОТ = "" Then missingFile = "МОТ-Мастер"
-    If fileТСБ = "" Then missingFile = IIf(missingFile = "", "ТСБ-Мастер", "МОТ и ТСБ")
+    If fileРњРћРў = "" Then missingFile = "РњРћРў-РњР°СЃС‚РµСЂ"
+    If fileРўРЎР‘ = "" Then missingFile = IIf(missingFile = "", "РўРЎР‘-РњР°СЃС‚РµСЂ", "РњРћРў Рё РўРЎР‘")
     If missingFile <> "" Then
-        If MsgBox("Файл(ы) не найден: " & missingFile & vbNewLine & "Продолжить без него?", vbYesNo + vbExclamation) = vbNo Then Exit Sub
+        If MsgBox("Р¤Р°Р№Р»(С‹) РЅРµ РЅР°Р№РґРµРЅ: " & missingFile & vbNewLine & "РџСЂРѕРґРѕР»Р¶РёС‚СЊ Р±РµР· РЅРµРіРѕ?", vbYesNo + vbExclamation) = vbNo Then Exit Sub
     End If
     
-    ' 1. АНАЛИЗ ПРИЁМНИКА
-    ОбновитьСтатус 10, "Анализ существующих позиций..."
-    LogMsg ChrW(8635) & "Чтение приёмника..."
+    ' 1. РђРќРђР›РР— РџР РРЃРњРќРРљРђ
+    РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 10, "РђРЅР°Р»РёР· СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… РїРѕР·РёС†РёР№..."
+    LogMsg ChrW(8635) & "Р§С‚РµРЅРёРµ РїСЂРёС‘РјРЅРёРєР°..."
     Dim wsRec As Worksheet: Set wsRec = ThisWorkbook.Sheets(SHEET_REC)
     Dim lastRowRec As Long: lastRowRec = wsRec.Cells(wsRec.Rows.Count, "B").End(xlUp).Row
-    If lastRowRec < REC_START_ROW Then LogMsg "Приёмник пуст. Выход.", "WARN": Exit Sub
+    If lastRowRec < REC_START_ROW Then LogMsg "РџСЂРёС‘РјРЅРёРє РїСѓСЃС‚. Р’С‹С…РѕРґ.", "WARN": Exit Sub
     
     Dim dictRecG As Object: Set dictRecG = CreateObject("Scripting.Dictionary")
     Dim i As Long
     For i = REC_START_ROW To lastRowRec
         Dim baseKeyRec As String
-        baseKeyRec = БезопасныйКлюч(wsRec.Cells(i, "B").Value, wsRec.Cells(i, "C").Value, wsRec.Cells(i, "D").Value, wsRec.Cells(i, "F").Value)
+        baseKeyRec = Р‘РµР·РѕРїР°СЃРЅС‹Р№РљР»СЋС‡(wsRec.Cells(i, "B").Value, wsRec.Cells(i, "C").Value, wsRec.Cells(i, "D").Value, wsRec.Cells(i, "F").Value)
         Dim idxRec As Variant: idxRec = wsRec.Cells(i, "I").Value
         If IsNumeric(idxRec) And idxRec <> "" Then
             dictRecG(baseKeyRec & "|" & CLng(idxRec)) = wsRec.Cells(i, "G").Value
         End If
-        If i Mod 500 = 0 Then ОбновитьСтатус 10 + Int(i / lastRowRec * 15), "Анализ приёмника..."
+        If i Mod 500 = 0 Then РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 10 + Int(i / lastRowRec * 15), "РђРЅР°Р»РёР· РїСЂРёС‘РјРЅРёРєР°..."
     Next i
-    LogMsg "Приёмник: " & dictRecG.Count & " позиций (сохранены значения G для сверки)"
+    LogMsg "РџСЂРёС‘РјРЅРёРє: " & dictRecG.Count & " РїРѕР·РёС†РёР№ (СЃРѕС…СЂР°РЅРµРЅС‹ Р·РЅР°С‡РµРЅРёСЏ G РґР»СЏ СЃРІРµСЂРєРё)"
     
-    ' 2. ЧТЕНИЕ ИСТОЧНИКОВ
-    ОбновитьСтатус 25, "Чтение источников (МОТ/ТСБ)..."
-    Dim arrFiles As Variant: arrFiles = Array(fileМОТ, fileТСБ)
-    Dim arrSheets As Variant: arrSheets = Array("TQ МОТ", "TQ ТСБ")
+    ' 2. Р§РўР•РќРР• РРЎРўРћР§РќРРљРћР’
+    РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 25, "Р§С‚РµРЅРёРµ РёСЃС‚РѕС‡РЅРёРєРѕРІ (РњРћРў/РўРЎР‘)..."
+    Dim arrFiles As Variant: arrFiles = Array(fileРњРћРў, fileРўРЎР‘)
+    Dim arrSheets As Variant: arrSheets = Array("TQ РњРћРў", "TQ РўРЎР‘")
     Dim dictSrcData As Object: Set dictSrcData = CreateObject("Scripting.Dictionary")
     Dim dictSrcCounter As Object: Set dictSrcCounter = CreateObject("Scripting.Dictionary")
     Dim dictOpenedByMacro As Object: Set dictOpenedByMacro = CreateObject("Scripting.Dictionary")
@@ -69,8 +69,8 @@ Public Sub Модуль1_Обновление_Источники1_2()
     Dim f As Integer
     For f = 0 To 1
         If Len(Dir(arrFiles(f))) = 0 Then GoTo NextSource
-        ОбновитьСтатус 25 + (f * 25), "Подключение: " & ChrW(9203) & " " & arrSheets(f)
-        LogMsg "Обработка: " & ChrW(8987) & arrSheets(f)
+        РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 25 + (f * 25), "РџРѕРґРєР»СЋС‡РµРЅРёРµ: " & ChrW(9203) & " " & arrSheets(f)
+        LogMsg "РћР±СЂР°Р±РѕС‚РєР°: " & ChrW(8987) & arrSheets(f)
         
         Dim wbSrc As Workbook, fname As String, isUserOpen As Boolean
         fname = fso.GetFileName(arrFiles(f))
@@ -82,18 +82,18 @@ Public Sub Модуль1_Обновление_Источники1_2()
         On Error GoTo 0
         
         If Not isUserOpen Then
-            LogMsg "Файл не открыт. Открываю в ReadOnly..."
+            LogMsg "Р¤Р°Р№Р» РЅРµ РѕС‚РєСЂС‹С‚. РћС‚РєСЂС‹РІР°СЋ РІ ReadOnly..."
             On Error Resume Next
             Set wbSrc = Workbooks.Open(arrFiles(f), ReadOnly:=True, UpdateLinks:=False)
             On Error GoTo 0
             If wbSrc Is Nothing Then
-                LogMsg "ОШИБКА: Не удалось открыть " & fname, "ERROR"
+                LogMsg "РћРЁРР‘РљРђ: РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ " & fname, "ERROR"
                 GoTo NextSource
             End If
             dictOpenedByMacro(arrFiles(f)) = True
-            LogMsg "Файл успешно открыт макросом."
+            LogMsg "Р¤Р°Р№Р» СѓСЃРїРµС€РЅРѕ РѕС‚РєСЂС‹С‚ РјР°РєСЂРѕСЃРѕРј."
         Else
-            LogMsg "Файл уже открыт пользователем. Использую текущий экземпляр (не буду закрывать)."
+            LogMsg "Р¤Р°Р№Р» СѓР¶Рµ РѕС‚РєСЂС‹С‚ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј. РСЃРїРѕР»СЊР·СѓСЋ С‚РµРєСѓС‰РёР№ СЌРєР·РµРјРїР»СЏСЂ (РЅРµ Р±СѓРґСѓ Р·Р°РєСЂС‹РІР°С‚СЊ)."
         End If
         
         Dim wsSrc As Worksheet
@@ -101,7 +101,7 @@ Public Sub Модуль1_Обновление_Источники1_2()
         Set wsSrc = wbSrc.Sheets(arrSheets(f))
         On Error GoTo 0
         If wsSrc Is Nothing Then
-            LogMsg "Лист '" & arrSheets(f) & "' не найден в файле.", "WARN"
+            LogMsg "Р›РёСЃС‚ '" & arrSheets(f) & "' РЅРµ РЅР°Р№РґРµРЅ РІ С„Р°Р№Р»Рµ.", "WARN"
             GoTo NextSource
         End If
         
@@ -112,30 +112,30 @@ Public Sub Модуль1_Обновление_Источники1_2()
                 If Trim(CStr(wsSrc.Cells(r, "B").Value)) = "" Then GoTo SkipRow
                 
                 Dim baseKeySrc As String
-                baseKeySrc = БезопасныйКлюч(wsSrc.Cells(r, "C").Value, arrSheets(f), wsSrc.Cells(r, "E").Value, wsSrc.Cells(r, "I").Value)
+                baseKeySrc = Р‘РµР·РѕРїР°СЃРЅС‹Р№РљР»СЋС‡(wsSrc.Cells(r, "C").Value, arrSheets(f), wsSrc.Cells(r, "E").Value, wsSrc.Cells(r, "I").Value)
                 
                 Dim seqIdx As Long
                 seqIdx = dictSrcCounter(baseKeySrc) + 1
                 dictSrcCounter(baseKeySrc) = seqIdx
                 
                 Dim fullKeySrc As String: fullKeySrc = baseKeySrc & "|" & seqIdx
-                ' Array: 0=B->A, 1=C->B, 2=Sheet->C, 3=E->D, 4=I->F, 5=J->G, 6=SeqIdx->I (V исключён)
+                ' Array: 0=B->A, 1=C->B, 2=Sheet->C, 3=E->D, 4=I->F, 5=J->G, 6=SeqIdx->I (V РёСЃРєР»СЋС‡С‘РЅ)
                 dictSrcData(fullKeySrc) = Array(wsSrc.Cells(r, "B").Value, wsSrc.Cells(r, "C").Value, arrSheets(f), _
                                                 wsSrc.Cells(r, "E").Value, wsSrc.Cells(r, "I").Value, _
                                                 wsSrc.Cells(r, "J").Value, seqIdx)
 SkipRow:
-                If r Mod 500 = 0 Then ОбновитьСтатус 25 + (f * 25) + Int(r / lastRowSrc * 20), "Чтение источников..."
+                If r Mod 500 = 0 Then РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 25 + (f * 25) + Int(r / lastRowSrc * 20), "Р§С‚РµРЅРёРµ РёСЃС‚РѕС‡РЅРёРєРѕРІ..."
             Next r
-            LogMsg arrSheets(f) & ": обработано строк данных: " & (lastRowSrc - SRC_START_ROW + 1) & " (позиций: " & dictSrcCounter.Count & ")"
+            LogMsg arrSheets(f) & ": РѕР±СЂР°Р±РѕС‚Р°РЅРѕ СЃС‚СЂРѕРє РґР°РЅРЅС‹С…: " & (lastRowSrc - SRC_START_ROW + 1) & " (РїРѕР·РёС†РёР№: " & dictSrcCounter.Count & ")"
         Else
-            LogMsg arrSheets(f) & ": данных нет (строки < " & SRC_START_ROW & ").", "WARN"
+            LogMsg arrSheets(f) & ": РґР°РЅРЅС‹С… РЅРµС‚ (СЃС‚СЂРѕРєРё < " & SRC_START_ROW & ").", "WARN"
         End If
 NextSource:
     Next f
     
-    ' 3. ВСТАВКА НЕДОСТАЮЩИХ ИЛИ ИЗМЕНЁННЫХ ПОЗИЦИЙ
-    ОбновитьСтатус 75, "Восстановление недостающих позиций..."
-    LogMsg "Поиск недостающих/изменённых записей..."
+    ' 3. Р’РЎРўРђР’РљРђ РќР•Р”РћРЎРўРђР®Р©РРҐ РР›Р РР—РњР•РќРЃРќРќР«РҐ РџРћР—РР¦РР™
+    РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 75, "Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ РЅРµРґРѕСЃС‚Р°СЋС‰РёС… РїРѕР·РёС†РёР№..."
+    LogMsg "РџРѕРёСЃРє РЅРµРґРѕСЃС‚Р°СЋС‰РёС…/РёР·РјРµРЅС‘РЅРЅС‹С… Р·Р°РїРёСЃРµР№..."
     Dim newRowsColl As Collection: Set newRowsColl = New Collection
     Dim key As Variant
     
@@ -152,7 +152,7 @@ NextSource:
         
         If shouldInsert Then newRowsColl.Add dictSrcData(key)
     Next key
-    LogMsg "Найдено позиций для восстановления/корректировки: " & newRowsColl.Count
+    LogMsg "РќР°Р№РґРµРЅРѕ РїРѕР·РёС†РёР№ РґР»СЏ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ/РєРѕСЂСЂРµРєС‚РёСЂРѕРІРєРё: " & newRowsColl.Count
     
     Dim nextRow As Long: nextRow = lastRowRec + 1
     Dim nd As Variant
@@ -172,14 +172,14 @@ NextSource:
         Next nd
     End If
     
-    ' 4. ОРАНЖЕВАЯ ПОМЕТКА
-    ОбновитьСтатус 90, "Проверка изменённых элементов..."
+    ' 4. РћР РђРќР–Р•Р’РђРЇ РџРћРњР•РўРљРђ
+    РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 90, "РџСЂРѕРІРµСЂРєР° РёР·РјРµРЅС‘РЅРЅС‹С… СЌР»РµРјРµРЅС‚РѕРІ..."
     Dim origLastRow As Long: origLastRow = lastRowRec
     Dim orangeCount As Long: orangeCount = 0
     
     For i = REC_START_ROW To origLastRow
         Dim baseKey As String
-        baseKey = БезопасныйКлюч(wsRec.Cells(i, "B").Value, wsRec.Cells(i, "C").Value, wsRec.Cells(i, "D").Value, wsRec.Cells(i, "F").Value)
+        baseKey = Р‘РµР·РѕРїР°СЃРЅС‹Р№РљР»СЋС‡(wsRec.Cells(i, "B").Value, wsRec.Cells(i, "C").Value, wsRec.Cells(i, "D").Value, wsRec.Cells(i, "F").Value)
         Dim idxVal As Variant: idxVal = wsRec.Cells(i, "I").Value
         
         Dim shouldHighlight As Boolean: shouldHighlight = False
@@ -202,20 +202,20 @@ NextSource:
             orangeCount = orangeCount + 1
         End If
         
-        If i Mod 500 = 0 Then ОбновитьСтатус 90 + Int(i / origLastRow * 8), "Проверка изменённых..."
+        If i Mod 500 = 0 Then РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 90 + Int(i / origLastRow * 8), "РџСЂРѕРІРµСЂРєР° РёР·РјРµРЅС‘РЅРЅС‹С…..."
     Next i
-    LogMsg "Помечено как изменённых/отсутствующих (оранжевым): " & orangeCount
+    LogMsg "РџРѕРјРµС‡РµРЅРѕ РєР°Рє РёР·РјРµРЅС‘РЅРЅС‹С…/РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‰РёС… (РѕСЂР°РЅР¶РµРІС‹Рј): " & orangeCount
     
-    ' 5. ЗАКРЫТИЕ ТОЛЬКО ФАЙЛОВ, ОТКРЫТЫХ МАКРОСОМ
+    ' 5. Р—РђРљР Р«РўРР• РўРћР›Р¬РљРћ Р¤РђР™Р›РћР’, РћРўРљР Р«РўР«РҐ РњРђРљР РћРЎРћРњ
     Dim openedPath As Variant
     For Each openedPath In dictOpenedByMacro.Keys
         On Error Resume Next
         Workbooks(fso.GetFileName(openedPath)).Close False
         On Error GoTo 0
-        LogMsg "Закрыт файл (открыт макросом): " & fso.GetFileName(openedPath)
+        LogMsg "Р—Р°РєСЂС‹С‚ С„Р°Р№Р» (РѕС‚РєСЂС‹С‚ РјР°РєСЂРѕСЃРѕРј): " & fso.GetFileName(openedPath)
     Next openedPath
     
-    ОбновитьСтатус 100, "[OK] Модуль 1 завершён."
-    LogMsg "=== МОДУЛЬ 1 ЗАВЕРШЁН УСПЕШНО ===" & vbCrLf
+    РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 100, "[OK] РњРѕРґСѓР»СЊ 1 Р·Р°РІРµСЂС€С‘РЅ."
+    LogMsg "=== РњРћР”РЈР›Р¬ 1 Р—РђР’Р•Р РЁРЃРќ РЈРЎРџР•РЁРќРћ ===" & vbCrLf
 End Sub
 

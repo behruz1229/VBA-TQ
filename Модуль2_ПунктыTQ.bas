@@ -1,40 +1,40 @@
-Attribute VB_Name = "Модуль2_ПунктыTQ"
+Attribute VB_Name = "РњРѕРґСѓР»СЊ2_РџСѓРЅРєС‚С‹TQ"
 ' ============================================================================
-' МОДУЛЬ: Модуль2_ПунктыTQ
-' НАЗНАЧЕНИЕ: Заполнение дат и статусов из файла пунктов TQ.
-' ЛОГИКА РАБОТЫ:
-'   1. Поиск и открытие файла "*пункты TQ*.xlsb" (лист "Ведомость элементов ТСБ и М (2)").
-'   2. Построение словаря по составному ключу A_B_C_D_F_G.
-'   3. Обновление приёмника: Столбцы J (формат даты) и L (текстовый формат) заполняются ТОЛЬКО если ячейки пустые.
-'   4. Ручные записи в J и L сохраняются и никогда не перезаписываются.
-'   5. В лог выводится точное количество обновлённых строк по каждому столбцу.
+' РњРћР”РЈР›Р¬: РњРѕРґСѓР»СЊ2_РџСѓРЅРєС‚С‹TQ
+' РќРђР—РќРђР§Р•РќРР•: Р—Р°РїРѕР»РЅРµРЅРёРµ РґР°С‚ Рё СЃС‚Р°С‚СѓСЃРѕРІ РёР· С„Р°Р№Р»Р° РїСѓРЅРєС‚РѕРІ TQ.
+' Р›РћР“РРљРђ Р РђР‘РћРўР«:
+'   1. РџРѕРёСЃРє Рё РѕС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° "*РїСѓРЅРєС‚С‹ TQ*.xlsb" (Р»РёСЃС‚ "Р’РµРґРѕРјРѕСЃС‚СЊ СЌР»РµРјРµРЅС‚РѕРІ РўРЎР‘ Рё Рњ (2)").
+'   2. РџРѕСЃС‚СЂРѕРµРЅРёРµ СЃР»РѕРІР°СЂСЏ РїРѕ СЃРѕСЃС‚Р°РІРЅРѕРјСѓ РєР»СЋС‡Сѓ A_B_C_D_F_G.
+'   3. РћР±РЅРѕРІР»РµРЅРёРµ РїСЂРёС‘РјРЅРёРєР°: РЎС‚РѕР»Р±С†С‹ J (С„РѕСЂРјР°С‚ РґР°С‚С‹) Рё L (С‚РµРєСЃС‚РѕРІС‹Р№ С„РѕСЂРјР°С‚) Р·Р°РїРѕР»РЅСЏСЋС‚СЃСЏ РўРћР›Р¬РљРћ РµСЃР»Рё СЏС‡РµР№РєРё РїСѓСЃС‚С‹Рµ.
+'   4. Р СѓС‡РЅС‹Рµ Р·Р°РїРёСЃРё РІ J Рё L СЃРѕС…СЂР°РЅСЏСЋС‚СЃСЏ Рё РЅРёРєРѕРіРґР° РЅРµ РїРµСЂРµР·Р°РїРёСЃС‹РІР°СЋС‚СЃСЏ.
+'   5. Р’ Р»РѕРі РІС‹РІРѕРґРёС‚СЃСЏ С‚РѕС‡РЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РѕР±РЅРѕРІР»С‘РЅРЅС‹С… СЃС‚СЂРѕРє РїРѕ РєР°Р¶РґРѕРјСѓ СЃС‚РѕР»Р±С†Сѓ.
 ' ============================================================================
 
 Option Explicit
 
-Public Sub Модуль2_Обновление_ПунктыTQ()
-    Const PATH_SRC3 As String = "\\vls.lan\ULVZG-DFS\Велесстрой СМУ\ПТО\ИД\ТСБ и МОТ\!Ведомость элементов\"
-    Const SHEET_REC As String = "Ведомость элементов ТСБ и МОТ"
-    Const SHEET_SRC As String = "Ведомость элементов ТСБ и М (2)"
+Public Sub РњРѕРґСѓР»СЊ2_РћР±РЅРѕРІР»РµРЅРёРµ_РџСѓРЅРєС‚С‹TQ()
+    Const PATH_SRC3 As String = "\\vls.lan\ULVZG-DFS\Р’РµР»РµСЃСЃС‚СЂРѕР№ РЎРњРЈ\РџРўРћ\РР”\РўРЎР‘ Рё РњРћРў\!Р’РµРґРѕРјРѕСЃС‚СЊ СЌР»РµРјРµРЅС‚РѕРІ\"
+    Const SHEET_REC As String = "Р’РµРґРѕРјРѕСЃС‚СЊ СЌР»РµРјРµРЅС‚РѕРІ РўРЎР‘ Рё РњРћРў"
+    Const SHEET_SRC As String = "Р’РµРґРѕРјРѕСЃС‚СЊ СЌР»РµРјРµРЅС‚РѕРІ РўРЎР‘ Рё Рњ (2)"
     Const REC_START_ROW As Long = 3
     Const SRC_START_ROW As Long = 3
     
-    LogMsg "=== ЗАПУСК МОДУЛЯ 2 ==="
-    ОбновитьСтатус 5, "Поиск файла пунктов TQ..."
+    LogMsg "=== Р—РђРџРЈРЎРљ РњРћР”РЈР›РЇ 2 ==="
+    РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 5, "РџРѕРёСЃРє С„Р°Р№Р»Р° РїСѓРЅРєС‚РѕРІ TQ..."
     
     Dim fileSrc As String
-    fileSrc = НайтиСамыйСвежийФайл(PATH_SRC3, "*пункты TQ*.xlsb")
+    fileSrc = РќР°Р№С‚РёРЎР°РјС‹Р№РЎРІРµР¶РёР№Р¤Р°Р№Р»(PATH_SRC3, "*РїСѓРЅРєС‚С‹ TQ*.xlsb")
     
     If fileSrc = "" Then
-        LogMsg "Файл пунктов TQ не найден", "WARN"
-        If MsgBox("Файл 'Ведомость элементов МК ТСБ и МОТ - пункты TQ.xlsb' не найден." & vbNewLine & "Продолжить без него?", vbYesNo + vbExclamation) = vbNo Then Exit Sub
-        ОбновитьСтатус 100, "[OK] Модуль 2 пропущен."
+        LogMsg "Р¤Р°Р№Р» РїСѓРЅРєС‚РѕРІ TQ РЅРµ РЅР°Р№РґРµРЅ", "WARN"
+        If MsgBox("Р¤Р°Р№Р» 'Р’РµРґРѕРјРѕСЃС‚СЊ СЌР»РµРјРµРЅС‚РѕРІ РњРљ РўРЎР‘ Рё РњРћРў - РїСѓРЅРєС‚С‹ TQ.xlsb' РЅРµ РЅР°Р№РґРµРЅ." & vbNewLine & "РџСЂРѕРґРѕР»Р¶РёС‚СЊ Р±РµР· РЅРµРіРѕ?", vbYesNo + vbExclamation) = vbNo Then Exit Sub
+        РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 100, "[OK] РњРѕРґСѓР»СЊ 2 РїСЂРѕРїСѓС‰РµРЅ."
         Exit Sub
     End If
-    LogMsg "Найден файл TQ: " & CreateObject("Scripting.FileSystemObject").GetFileName(fileSrc)
+    LogMsg "РќР°Р№РґРµРЅ С„Р°Р№Р» TQ: " & CreateObject("Scripting.FileSystemObject").GetFileName(fileSrc)
     
-    ' Безопасное открытие
-    ОбновитьСтатус 10, "Открытие источника TQ..."
+    ' Р‘РµР·РѕРїР°СЃРЅРѕРµ РѕС‚РєСЂС‹С‚РёРµ
+    РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 10, "РћС‚РєСЂС‹С‚РёРµ РёСЃС‚РѕС‡РЅРёРєР° TQ..."
     Dim fso As Object: Set fso = CreateObject("Scripting.FileSystemObject")
     Dim wbSrc As Workbook, fname As String, isUserOpen As Boolean
     fname = fso.GetFileName(fileSrc)
@@ -50,12 +50,12 @@ Public Sub Модуль2_Обновление_ПунктыTQ()
         Set wbSrc = Workbooks.Open(fileSrc, ReadOnly:=True, UpdateLinks:=False)
         On Error GoTo 0
         If wbSrc Is Nothing Then
-            LogMsg "ОШИБКА: Не удалось открыть файл TQ", "ERROR"
-            MsgBox "Не удалось открыть файл TQ.", vbCritical
+            LogMsg "РћРЁРР‘РљРђ: РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» TQ", "ERROR"
+            MsgBox "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» TQ.", vbCritical
             Exit Sub
         End If
     Else
-        LogMsg "Файл TQ уже открыт пользователем. Использую текущий экземпляр."
+        LogMsg "Р¤Р°Р№Р» TQ СѓР¶Рµ РѕС‚РєСЂС‹С‚ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј. РСЃРїРѕР»СЊР·СѓСЋ С‚РµРєСѓС‰РёР№ СЌРєР·РµРјРїР»СЏСЂ."
     End If
     
     Dim wsSrc As Worksheet
@@ -64,13 +64,13 @@ Public Sub Модуль2_Обновление_ПунктыTQ()
     On Error GoTo 0
     If wsSrc Is Nothing Then
         If Not isUserOpen Then wbSrc.Close False
-        LogMsg "Лист '" & SHEET_SRC & "' не найден в файле TQ", "WARN"
-        MsgBox "Лист '" & SHEET_SRC & "' не найден.", vbCritical
+        LogMsg "Р›РёСЃС‚ '" & SHEET_SRC & "' РЅРµ РЅР°Р№РґРµРЅ РІ С„Р°Р№Р»Рµ TQ", "WARN"
+        MsgBox "Р›РёСЃС‚ '" & SHEET_SRC & "' РЅРµ РЅР°Р№РґРµРЅ.", vbCritical
         Exit Sub
     End If
     
-    ' Загрузка ключей и данных J/L
-    ОбновитьСтатус 20, "Загрузка ключей источника TQ..."
+    ' Р—Р°РіСЂСѓР·РєР° РєР»СЋС‡РµР№ Рё РґР°РЅРЅС‹С… J/L
+    РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 20, "Р—Р°РіСЂСѓР·РєР° РєР»СЋС‡РµР№ РёСЃС‚РѕС‡РЅРёРєР° TQ..."
     Dim lastRowSrc As Long
     lastRowSrc = wsSrc.Cells(wsSrc.Rows.Count, "A").End(xlUp).Row
     Dim dictSrc As Object: Set dictSrc = CreateObject("Scripting.Dictionary")
@@ -79,20 +79,20 @@ Public Sub Модуль2_Обновление_ПунктыTQ()
     If lastRowSrc >= SRC_START_ROW Then
         For r = SRC_START_ROW To lastRowSrc
             Dim kSrc As String
-            kSrc = БезопасныйКлюч(wsSrc.Cells(r, "A").Value, wsSrc.Cells(r, "B").Value, wsSrc.Cells(r, "C").Value, _
+            kSrc = Р‘РµР·РѕРїР°СЃРЅС‹Р№РљР»СЋС‡(wsSrc.Cells(r, "A").Value, wsSrc.Cells(r, "B").Value, wsSrc.Cells(r, "C").Value, _
                                   wsSrc.Cells(r, "D").Value, wsSrc.Cells(r, "F").Value, wsSrc.Cells(r, "G").Value)
             
             If Not dictSrc.Exists(kSrc) Then
                 dictSrc(kSrc) = Array(wsSrc.Cells(r, "J").Value, wsSrc.Cells(r, "L").Value)
             End If
-            If r Mod 500 = 0 Then ОбновитьСтатус 20 + Int(r / lastRowSrc * 25), "Загрузка ключей источника TQ..."
+            If r Mod 500 = 0 Then РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 20 + Int(r / lastRowSrc * 25), "Р—Р°РіСЂСѓР·РєР° РєР»СЋС‡РµР№ РёСЃС‚РѕС‡РЅРёРєР° TQ..."
         Next r
     End If
-    LogMsg "Источник TQ загружен: " & dictSrc.Count & " уникальных ключей"
+    LogMsg "РСЃС‚РѕС‡РЅРёРє TQ Р·Р°РіСЂСѓР¶РµРЅ: " & dictSrc.Count & " СѓРЅРёРєР°Р»СЊРЅС‹С… РєР»СЋС‡РµР№"
     If Not isUserOpen Then wbSrc.Close False
     
-    ' Обновление приёмника (J и L независимо)
-    ОбновитьСтатус 50, "Обновление столбцов J и L в приёмнике..."
+    ' РћР±РЅРѕРІР»РµРЅРёРµ РїСЂРёС‘РјРЅРёРєР° (J Рё L РЅРµР·Р°РІРёСЃРёРјРѕ)
+    РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 50, "РћР±РЅРѕРІР»РµРЅРёРµ СЃС‚РѕР»Р±С†РѕРІ J Рё L РІ РїСЂРёС‘РјРЅРёРєРµ..."
     Dim wsRec As Worksheet: Set wsRec = ThisWorkbook.Sheets(SHEET_REC)
     Dim lastRowRec As Long: lastRowRec = wsRec.Cells(wsRec.Rows.Count, "A").End(xlUp).Row
     If lastRowRec < REC_START_ROW Then Exit Sub
@@ -102,7 +102,7 @@ Public Sub Модуль2_Обновление_ПунктыTQ()
     
     For i = REC_START_ROW To lastRowRec
         Dim kRec As String
-        kRec = БезопасныйКлюч(wsRec.Cells(i, "A").Value, wsRec.Cells(i, "B").Value, wsRec.Cells(i, "C").Value, _
+        kRec = Р‘РµР·РѕРїР°СЃРЅС‹Р№РљР»СЋС‡(wsRec.Cells(i, "A").Value, wsRec.Cells(i, "B").Value, wsRec.Cells(i, "C").Value, _
                               wsRec.Cells(i, "D").Value, wsRec.Cells(i, "F").Value, wsRec.Cells(i, "G").Value)
         
         If dictSrc.Exists(kRec) Then
@@ -121,10 +121,10 @@ Public Sub Модуль2_Обновление_ПунктыTQ()
             End If
         End If
         
-        If i Mod stepSize = 0 Then ОбновитьСтатус 50 + Int(i / lastRowRec * 45), "Обновление столбцов J и L..."
+        If i Mod stepSize = 0 Then РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 50 + Int(i / lastRowRec * 45), "РћР±РЅРѕРІР»РµРЅРёРµ СЃС‚РѕР»Р±С†РѕРІ J Рё L..."
     Next i
     
-    LogMsg "Модуль 2 завершён. Обновлено J: " & updatedJ & " строк | Обновлено L: " & updatedL & " строк"
-    ОбновитьСтатус 100, "[OK] Модуль 2 завершён. Обновлено J: " & updatedJ & ", L: " & updatedL
+    LogMsg "РњРѕРґСѓР»СЊ 2 Р·Р°РІРµСЂС€С‘РЅ. РћР±РЅРѕРІР»РµРЅРѕ J: " & updatedJ & " СЃС‚СЂРѕРє | РћР±РЅРѕРІР»РµРЅРѕ L: " & updatedL & " СЃС‚СЂРѕРє"
+    РћР±РЅРѕРІРёС‚СЊРЎС‚Р°С‚СѓСЃ 100, "[OK] РњРѕРґСѓР»СЊ 2 Р·Р°РІРµСЂС€С‘РЅ. РћР±РЅРѕРІР»РµРЅРѕ J: " & updatedJ & ", L: " & updatedL
 End Sub
 
